@@ -2,18 +2,38 @@
 <html lang="fi" xmlns="http://www.w3.org/1999/xhtml" xml:lang="fi">
 <head>
 <meta charset="utf-8"/>
-<link rel="StyleSheet" href="vt2.css" type="text/css" />
+<link rel="StyleSheet" href="{{ url_for('static', filename='vt2.css') }}" type="text/css" />
 <title>TIES4080 - Viikkotehtävä 2 - 2025 kesä</title>
 </head>
 <body>
 
 <!-- täydennä lomaketta tarpeen mukaan. Älä kuitenkaan muuta kenttien nimiä -->
-<form action="#" method="get">
+<form action="{{ url_for('lauta') }}" method="post">
 <label>Laudan koko <input type="text" value="8" name="lauta" /></label>
 <label>Pelaaja 1 <input type="text" value="" name="p1" /></label>
 <label>Pelaaja 2 <input type="text" value="" name="p2" /></label>
 <p><input type="submit" name="peli" value="Luo pelilauta" /></p>
+<p>{{ hello }}</p>
+<p>{{ koko }}</p>
 </form>
+
+<table>
+    <tbody>
+    {% for rivi in range(0, koko) %}
+    <tr>
+        {% for sarake in range(0, koko) %}
+            {% if sarake == rivi %}
+            <td>
+                <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
 
 <!-- Tästä eteenpäin on vain apuvälineenä käytettäviä skriptejä -->
 <!-- HTMLinspectoria käytetään sivun live-muutosten validointiin. Kannattaa
