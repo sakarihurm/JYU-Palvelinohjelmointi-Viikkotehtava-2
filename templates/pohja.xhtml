@@ -17,25 +17,28 @@
 <p id="luoPainike"><input type="submit" name="peli" value="Luo pelilauta" /></p>
 
 </form>
-
-<table>
-    <tbody>
-    {% for rivi in range(0, koko) %}
-    <tr>
-        {% for sarake in range(0, koko) %}
-            {% if sarake == rivi %}
-            <td>
-                <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
-            </td>
-            {% else %}
-            <td></td>
-            {% endif %}
+<div class="pelialue">
+    <h3 id="pelaajanNimi">{{pelaaja1}}</h3>
+    <table>
+        <tbody>
+        {% for rivi in range(0, koko) %}
+        <tr>
+            {% for sarake in range(0, koko) %}
+                {% if sarake == rivi %}
+                <td>
+                    <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
         {% endfor %}
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+    <h3 id="pelaajanNimi">{{pelaaja2}}</h3>
 
+ </div>
 <!-- Tästä eteenpäin on vain apuvälineenä käytettäviä skriptejä -->
 <!-- HTMLinspectoria käytetään sivun live-muutosten validointiin. Kannattaa
 vielä varmuuden vuoksi ajaa välillä myös W3C:n validaattori -->
