@@ -11,9 +11,9 @@
 <h1>Pelilauta</h1>
 <p>Kerro luotavan pelialueen koko ja pelaajien nimet. Ruudukko on yhtä monta ruutua leveä kuin korkea.</p>
 <form action="{{ url_for('lauta') }}" method="post">
-<label>Laudan koko <input type="text" value="8" name="lauta" /></label>
-<label>Pelaaja 1 <input type="text" value="" name="p1" /></label>
-<label>Pelaaja 2 <input type="text" value="" name="p2" /></label>
+<label>Laudan koko <input type="text" value="{{koko}}" name="lauta" /></label>
+<label>Pelaaja 1 <input type="text" value="{{pelaaja1}}" name="p1" /></label>
+<label>Pelaaja 2 <input type="text" value="{{pelaaja2}}" name="p2" /></label>
 <p id="luoPainike"><input type="submit" name="peli" value="Luo pelilauta" /></p>
 
 </form>
