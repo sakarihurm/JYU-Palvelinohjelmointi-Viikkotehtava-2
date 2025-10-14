@@ -41,9 +41,16 @@ table {
   border-collapse: collapse;
 }
 
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
 .virhe {
   color: #d32f2f;
   font-size: 0.9rem;
   font-weight: bold;
-  text-align: right;
+  margin-left: 1em;
+  margin-top: 0.5em;
+ 
 }
