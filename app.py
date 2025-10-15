@@ -8,23 +8,27 @@ app = Flask(__name__)
 def peli():
     return Response("Game begins", content_type="text/plain; charset=UTF-8")
 
-@app.route('/lauta/vt2.cgi', methods=['GET'])
-@app.route('/lauta', methods=['POST', 'GET'])
+@app.route('/vt2/vt2.cgi', methods=['GET'])
+@app.route('/vt2', methods=['POST', 'GET'])
 def lauta():
-    koko = request.args.get('lauta')
-    pelaaja1 = request.args.get('p1')
-    pelaaja2 = request.args.get('p2')
-
-    # Jos yhtään ei ole annettu, ohjaa /lauta -reitille
-    if not (koko or pelaaja1 or pelaaja2):
-        koko = request.values.get("lauta", "")
-        pelaaja1 = request.values.get("p1", "")
-        pelaaja2 = request.values.get("p2", "")
-
     virhe = False
     try:
+        koko = request.args.get('lauta')
+        pelaaja1 = request.args.get('p1')
+        pelaaja2 = request.args.get('p2')
+    except Exception as e:
+        pass
+
+    if not (koko or pelaaja1 or pelaaja2):
+        koko = request.values.get("lauta", 8)
+        pelaaja1 = request.values.get("p1", "")
+        pelaaja2 = request.values.get("p2", "")
+    else:
+        virhe = tarkistaNimet(pelaaja1, pelaaja2)
+
+    try:
         koko = int(koko)
-    except:
+    except Exception as e:
         koko = 8
         virhe = True
 
@@ -32,9 +36,17 @@ def lauta():
         koko = 8
         virhe = True
 
-    if len(pelaaja1.strip()) == 0:
-        virhe = True
-    if len(pelaaja2.strip()) == 0:
-        virhe = True
-        
-    return render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2)
+    if request.method == "POST" and not virhe:
+        virhe = tarkistaNimet(pelaaja1, pelaaja2)
+
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2), content_type="application/xhtml+xml; charset=utf-8")
+
+def tarkistaNimet(pelaaja1, pelaaja2):
+    try: 
+        if len(pelaaja1.strip()) == 0:
+            return True
+        if len(pelaaja2.strip()) == 0:
+            return True
+    except Exception as e:
+        return True
+    return False

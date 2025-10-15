@@ -17,7 +17,7 @@ label {
   display: inline-block;
 }
 
-#pelaajanNimi {
+h3 {
   text-align: center;
   margin-bottom: 1em;
   width: 100%; 
