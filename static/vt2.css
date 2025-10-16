@@ -13,9 +13,6 @@ label {
   text-align: right
 }
 
-.pelialue {
-  display: inline-block;
-}
 
 h3 {
   text-align: center;
@@ -32,8 +29,14 @@ td {
   height="100
 }
 
-tr:nth-child(even) td:nth-child(odd),
-tr:nth-child(odd) td:nth-child(even) {
+
+.white tr:nth-child(even) td:nth-child(odd),
+.white tr:nth-child(odd) td:nth-child(even) {
+  background-color: black;
+}
+
+.black tr:nth-child(odd) td:nth-child(odd),
+.black tr:nth-child(even) td:nth-child(even) {
   background-color: black;
 }
 

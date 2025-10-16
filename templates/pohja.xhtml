@@ -29,9 +29,27 @@
 
 </div>
 
-<div class="pelialue">
+<div class="{{first}}">
     <h3>{{pelaaja1}}</h3>
     <table>
+        {% if balls == "bottom-to-top" %}
+        <tbody>
+        {% for rivi in range(0, koko) %}
+        <tr>
+            {% for sarake in range(0, koko) %}
+                {% if sarake == koko - rivi - 1 %}
+                <td>
+                    <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                </td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+        </tbody>
+
+        {% else %}
         <tbody>
         {% for rivi in range(0, koko) %}
         <tr>
@@ -47,6 +65,9 @@
         </tr>
         {% endfor %}
         </tbody>
+        {% endif %}
+
+
     </table>
     <h3>{{pelaaja2}}</h3>
 
