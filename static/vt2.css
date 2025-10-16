@@ -20,12 +20,21 @@ h3 {
   width: 100%; 
 }
 
-
-
 td {
   border: 2px solid black;
+}
+
+
+.ruutu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   aspect-ratio: 1 / 1;
-  padding: 0;
+}
+
+img {
+  width: 75%;
+  height: 75%;
 }
 
 
@@ -42,7 +51,8 @@ td {
 table {
   border-collapse: collapse;
   height: 100vh;
-  width: 100vw;
+  width: 95vw;
+  table-layout: fixed;
 }
 
 .container {
@@ -56,5 +66,4 @@ table {
   font-weight: bold;
   margin-left: 1em;
   margin-top: 0.5em;
- 
 }

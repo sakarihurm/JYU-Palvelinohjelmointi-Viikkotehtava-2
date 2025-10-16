@@ -56,7 +56,9 @@
             {% for sarake in range(0, koko) %}
                 {% if sarake == rivi %}
                 <td>
-                    <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                    <div class="ruutu">
+                        <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                    </div>
                 </td>
                 {% else %}
                 <td></td>
