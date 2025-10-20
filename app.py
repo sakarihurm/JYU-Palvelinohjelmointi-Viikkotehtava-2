@@ -5,6 +5,9 @@ import urllib.request, json
 import os
 app = Flask(__name__)
 
+
+piilotetut = set()
+
 @app.route('/')
 def peli():
     return Response("Game begins", content_type="text/plain; charset=UTF-8")
@@ -44,7 +47,8 @@ def lauta():
     if request.method == "POST" and not virhe:
         virhe = tarkistaNimet(pelaaja1, pelaaja2)
 
-    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, first="black", balls=data["balls"]), content_type="application/xhtml+xml; charset=utf-8")
+
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, first=data["first"], balls="bottom-to-top", piilotetut=piilotetut), content_type="application/xhtml+xml; charset=utf-8")
 
 def tarkistaNimet(pelaaja1, pelaaja2):
     try: 
@@ -55,3 +59,14 @@ def tarkistaNimet(pelaaja1, pelaaja2):
     except Exception as e:
         return True
     return False
+
+@app.route('/vt2/piilota', methods=['POST'])
+def piilota():
+    try:
+        rivi = int(request.values.get("rivi"))
+        sarake = int(request.values.get("sarake"))
+        piilotetut.add((rivi, sarake))
+        print(piilotetut, type(piilotetut), rivi, type(rivi))
+    except Exception as e:
+        print("pilotus virhe", e)
+    return redirect('/vt2')

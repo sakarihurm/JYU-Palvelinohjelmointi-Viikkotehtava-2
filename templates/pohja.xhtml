@@ -13,7 +13,7 @@
 
 <div class="container">
 
-    <form action="{{ url_for('lauta') }}" method="post">
+    <form id="lomake" action="{{ url_for('lauta') }}" method="post">
 
     <label>Laudan koko <input type="text" value="{{koko}}" name="lauta" /></label>
     <label>Pelaaja 1 <input type="text" value="{{pelaaja1}}" name="p1" /></label>
@@ -39,7 +39,15 @@
             {% for sarake in range(0, koko) %}
                 {% if sarake == koko - rivi - 1 %}
                 <td>
-                    <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                {% if (rivi, sarake) not in piilotetut %}
+                    <form id="piilota" action="{{ url_for('piilota') }}" method="POST">
+                        <input type="hidden" name="rivi" value="{{ rivi }}"/>
+                        <input type="hidden" name="sarake" value="{{ sarake }}"/>
+                        <button type="submit">
+                            <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
+                        </button>
+                    </form>
+                {% endif %}
                 </td>
                 {% else %}
                 <td></td>
@@ -57,7 +65,9 @@
                 {% if sarake == rivi %}
                 <td>
                     <div class="ruutu">
-                        <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                        <button class="painike">
+                            <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                        </button>
                     </div>
                 </td>
                 {% else %}
