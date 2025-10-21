@@ -5,9 +5,11 @@ import urllib.request, json
 import os
 app = Flask(__name__)
 
-
+data = {}
 piilotetut = set()
 url = ""
+base_url = ""
+virhe = False
 
 @app.route('/')
 def peli():
@@ -17,7 +19,9 @@ def peli():
 @app.route('/vt2', methods=['POST', 'GET'])
 def lauta():
     global url
-    virhe = False
+    global data
+    global virhe
+    global base_url
 
     with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
         data = json.load(response)
@@ -29,9 +33,9 @@ def lauta():
         pelaaja2 = request.args.get('p2')
     except Exception as e:
         pass
-
+    
     if not (koko or pelaaja1 or pelaaja2):
-        koko = request.values.get("lauta", data["min"])
+        koko = request.values.get("koko", data["min"])
         pelaaja1 = request.values.get("p1", "")
         pelaaja2 = request.values.get("p2", "")
     else:
@@ -49,10 +53,11 @@ def lauta():
 
     if request.method == "POST" and not virhe:
         virhe = tarkistaNimet(pelaaja1, pelaaja2)
-
-    haku = request.base_url + url
-
-    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku=haku, first=data["first"], balls="bottom-to-top", piilotetut=piilotetut), content_type="application/xhtml+xml; charset=utf-8")
+        piilotetut.clear()
+    
+    base_url = request.base_url
+    haku = base_url + url
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut), content_type="application/xhtml+xml; charset=utf-8")
 
 def tarkistaNimet(pelaaja1, pelaaja2):
     try: 
@@ -64,17 +69,25 @@ def tarkistaNimet(pelaaja1, pelaaja2):
         return True
     return False
 
+
 @app.route('/vt2/piilota', methods=['POST'])
 def piilota():
     global url
     try:
         rivi = int(request.values.get("rivi"))
         sarake = int(request.values.get("sarake"))
+        koko = int(request.form.get('koko', data["min"]))
+        p1 = request.form.get('p1', '')
+        p2 = request.form.get('p2', '')
+
         piilotetut.add((rivi, sarake))
-        url = "/palauta?rivi="+ str(rivi) +"&sarake=" + str(sarake)
+
+        url = "/palauta?rivi="+ str(rivi) +"&sarake=" + str(sarake) +"&koko="+ str(koko) +"&p1="+ p1 +"&p2="+ p2
+        haku = base_url + url
+        print("piilotetaan: ", rivi, sarake)
     except Exception as e:
         print("piilotus virhe", e)
-    return redirect('/vt2')
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=p1, pelaaja2=p2, haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut), content_type="application/xhtml+xml; charset=utf-8")
 
 @app.route('/vt2/palauta', methods=['GET'])
 def palauta():
@@ -82,8 +95,16 @@ def palauta():
     try:
         rivi = request.args.get('rivi')
         sarake = request.args.get('sarake')
+        koko = int(request.args.get('koko', data["min"]))
+        p1 = request.args.get('p1', '')
+        p2 = request.args.get('p2', '')
+
         piilotetut.remove((int(rivi), int(sarake)))
-        url = "/palauta?rivi="+ str(rivi) +"&sarake=" + str(sarake)
+
+        url = "/palauta?rivi="+ str(rivi) +"&sarake=" + str(sarake) +"&koko="+ str(koko) +"&p1="+ p1 +"&p2="+ p2
+        haku = base_url + url
+
+        print("palautetaan: ", rivi, sarake)
     except Exception as e:
         print("palautus virhe", e)
-    return redirect('/vt2')
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=p1, pelaaja2=p2, haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut), content_type="application/xhtml+xml; charset=utf-8")

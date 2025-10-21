@@ -14,10 +14,10 @@
 <div class="container">
 
     <form id="lomake" action="{{ url_for('lauta') }}" method="post">
-
-    <label>Laudan koko <input type="text" value="{{koko}}" name="lauta" /></label>
+    <label>Laudan koko <input type="text" value="{{koko}}" name="koko"/></label>
     <label>Pelaaja 1 <input type="text" value="{{pelaaja1}}" name="p1" /></label>
     <label>Pelaaja 2 <input type="text" value="{{pelaaja2}}" name="p2" /></label>
+
     <p id="luoPainike"><input type="submit" name="peli" value="Luo pelilauta" /></p>
 
     </form>
@@ -44,6 +44,9 @@
                     <form id="piilota" action="{{ url_for('piilota') }}" method="POST">
                         <input type="hidden" name="rivi" value="{{ rivi }}"/>
                         <input type="hidden" name="sarake" value="{{ sarake }}"/>
+                        <input type="hidden" name="koko" value="{{ koko }}"/>
+                        <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
+                        <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
                         <button type="submit">
                             <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
                         </button>
@@ -65,11 +68,18 @@
             {% for sarake in range(0, koko) %}
                 {% if sarake == rivi %}
                 <td>
-                    <div class="ruutu">
-                        <button class="painike">
-                            <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="blue circle"/>
+                {% if (rivi, sarake) not in piilotetut %}
+                    <form id="piilota" action="{{ url_for('piilota') }}" method="POST">
+                        <input type="hidden" name="rivi" value="{{ rivi }}"/>
+                        <input type="hidden" name="sarake" value="{{ sarake }}"/>
+                        <input type="hidden" name="koko" value="{{ koko }}"/>
+                        <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
+                        <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
+                        <button type="submit">
+                            <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
                         </button>
-                    </div>
+                    </form>
+                {% endif %}
                 </td>
                 {% else %}
                 <td></td>
