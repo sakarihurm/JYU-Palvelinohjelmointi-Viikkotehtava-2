@@ -28,9 +28,7 @@
 
 </div>
 
-{% if haku|length == 0%}
-<p><a href="#" class="disabled-link">Undo</a></p>
-{% else %}
+{% if haku|length != 0%}
 <p>
     <a href="{{haku}}">Undo</a>
 </p>
@@ -47,7 +45,7 @@
                 {% if sarake == koko - rivi - 1 %}
                 <td>
                 {% if (rivi, sarake) not in piilotetut %}
-                    <form id="piilota" action="{{ url_for('piilota') }}" method="POST">
+                    <form action="{{ url_for('piilota') }}" method="POST">
                         <input type="hidden" name="rivi" value="{{ rivi }}"/>
                         <input type="hidden" name="sarake" value="{{ sarake }}"/>
                         <input type="hidden" name="koko" value="{{ koko }}"/>
@@ -79,7 +77,7 @@
                 {% if sarake == rivi %}
                 <td>
                 {% if (rivi, sarake) not in piilotetut %}
-                    <form id="piilota" action="{{ url_for('piilota') }}" method="POST">
+                    <form action="{{ url_for('piilota') }}" method="POST">
                         <input type="hidden" name="rivi" value="{{ rivi }}"/>
                         <input type="hidden" name="sarake" value="{{ sarake }}"/>
                         <input type="hidden" name="koko" value="{{ koko }}"/>

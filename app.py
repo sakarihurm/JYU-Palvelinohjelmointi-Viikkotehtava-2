@@ -8,9 +8,7 @@ app = Flask(__name__)
 data = {}
 piilotetut = set()
 palautetut = set()
-url = ""
 base_url = ""
-virhe = False
 
 @app.route('/')
 def peli():
@@ -19,10 +17,9 @@ def peli():
 @app.route('/vt2/vt2.cgi', methods=['GET'])
 @app.route('/vt2', methods=['POST', 'GET'])
 def lauta():
-    global url
     global data
-    global virhe
     global base_url
+    virhe = False
 
     with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
         data = json.load(response)
@@ -73,7 +70,6 @@ def tarkistaNimet(pelaaja1, pelaaja2):
 
 @app.route('/vt2/piilota', methods=['POST'])
 def piilota():
-    global url
     try:
         rivi = int(request.values.get("rivi"))
         sarake = int(request.values.get("sarake"))
@@ -85,14 +81,14 @@ def piilota():
 
         url = "/palauta?rivi="+ str(rivi) +"&sarake=" + str(sarake) +"&koko="+ str(koko) +"&p1="+ p1 +"&p2="+ p2
         haku = base_url + url
-        print("piilotetaan: ", rivi, sarake)
+
     except Exception as e:
         print("piilotus virhe", e)
-    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=p1, pelaaja2=p2, haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
+
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=False, pelaaja1=p1, pelaaja2=p2, haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
 
 @app.route('/vt2/palauta', methods=['GET'])
 def palauta():
-    global url
     try:
         rivi = int(request.args.get('rivi'))
         sarake = int(request.args.get('sarake'))
@@ -103,9 +99,7 @@ def palauta():
         piilotetut.remove((rivi, sarake))
         palautetut.add((rivi, sarake))
 
-        print("palautetaan: ", rivi, sarake)
-
     except Exception as e:
         print("palautus virhe", e)
 
-    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=p1, pelaaja2=p2, haku="", first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=False, pelaaja1=p1, pelaaja2=p2, haku="", first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
