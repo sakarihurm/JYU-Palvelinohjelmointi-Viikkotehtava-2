@@ -28,7 +28,13 @@
 
 </div>
 
-<p><a href="{{haku}}">Undo</a></p>
+{% if haku|length == 0%}
+<p><a href="#" class="disabled-link">Undo</a></p>
+{% else %}
+<p>
+    <a href="{{haku}}">Undo</a>
+</p>
+{% endif %}
 
 <div class="{{first}}">
     <h3>{{pelaaja1}}</h3>
@@ -48,7 +54,11 @@
                         <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
                         <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
                         <button type="submit">
+                            {% if (rivi, sarake) in palautetut %}
+                            <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
+                            {% else %}
                             <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
+                            {% endif %}
                         </button>
                     </form>
                 {% endif %}
@@ -76,7 +86,11 @@
                         <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
                         <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
                         <button type="submit">
+                            {% if (rivi, sarake) in palautetut %}
+                            <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
+                            {% else %}
                             <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
+                            {% endif %}
                         </button>
                     </form>
                 {% endif %}
