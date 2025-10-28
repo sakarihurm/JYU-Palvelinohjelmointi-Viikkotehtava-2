@@ -7,20 +7,10 @@ from urllib.parse import urlencode
 import os
 app = Flask(__name__)
 
-data = {}
-piilotetut = set()
-palautetut = set()
-base_url = ""
 
-@app.route('/')
-def peli():
-    return Response("Game begins", content_type="text/plain; charset=UTF-8")
-
-@app.route('/vt2/vt2.cgi', methods=['GET'])
-@app.route('/vt2', methods=['POST', 'GET'])
+@app.route('/vt2.cgi', methods=['GET'])
+@app.route('/', methods=['POST', 'GET'])
 def lauta():
-    global data
-    global base_url
     virhe = False
 
     try: 
@@ -31,19 +21,40 @@ def lauta():
         print("Virhe haettaessa dataa:", e)
         data = {"min":8, "max":16, "first":"white", "balls": "top-to-bottom"}
 
-    try:
-        koko = request.args.get('lauta')
-        pelaaja1 = request.args.get('p1')
-        pelaaja2 = request.args.get('p2')
-    except Exception as e:
-        pass
-    
-    if not (koko or pelaaja1 or pelaaja2):
-        koko = request.values.get("koko", data["min"])
-        pelaaja1 = request.values.get("p1", "")
-        pelaaja2 = request.values.get("p2", "")
-    else:
-        virhe = tarkistaNimet(pelaaja1, pelaaja2)
+    koko = request.values.get("koko", data["min"])
+    pelaaja1 = request.values.get("p1", "")
+    pelaaja2 = request.values.get("p2", "")
+    piilotetut_arvot = request.values.get("piilotetut", "")
+    palautetut_arvot = request.values.get("palautetut", "")
+
+    def muunnaTupleiksi(arvot):
+        if not arvot:
+            return set()
+
+        tulos = set()
+        try:
+            osat = arvot.split(';')
+
+            for item in osat:
+                if not item.strip():
+                    continue
+
+                luvut = item.split(',')
+                if len(luvut) != 2:
+                    continue
+
+                rivi = int(luvut[0])
+                sarake = int(luvut[1])
+
+                tulos.add((rivi, sarake))
+
+        except Exception as e:
+            print("Virhe listan purussa:", e)
+            return set()
+        return tulos
+
+    piilotetut = muunnaTupleiksi(piilotetut_arvot)
+    palautetut = muunnaTupleiksi(palautetut_arvot)
 
     try:
         koko = int(koko)
@@ -74,7 +85,7 @@ def tarkistaNimet(pelaaja1, pelaaja2):
     return False
 
 
-@app.route('/vt2/piilota', methods=['POST'])
+@app.route('/piilota', methods=['POST'])
 def piilota():
     try:
         tiedot = {
@@ -85,17 +96,16 @@ def piilota():
             "p2": request.form.get('p2', '')
         }
        
-        piilotetut.add((tiedot["rivi"], tiedot["sarake"]))
+        # piilotetut.add((tiedot["rivi"], tiedot["sarake"]))
         
-        url = "/palauta?" + urlencode(tiedot)
+        url = "palauta?" + urlencode(tiedot)
         haku = base_url + url
 
     except Exception as e:
         print("piilotus virhe", e)
-
     return Response(render_template('pohja.xhtml', koko=tiedot["koko"], virhe=False, pelaaja1=tiedot["p1"], pelaaja2=tiedot["p2"], haku=haku, first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
 
-@app.route('/vt2/palauta', methods=['GET'])
+@app.route('/palauta', methods=['GET'])
 def palauta():
     try:
         rivi = int(request.args.get('rivi'))
@@ -104,8 +114,8 @@ def palauta():
         p1 = request.args.get('p1', '')
         p2 = request.args.get('p2', '')
 
-        piilotetut.remove((rivi, sarake))
-        palautetut.add((rivi, sarake))
+        # piilotetut.remove((rivi, sarake))
+        # palautetut.add((rivi, sarake))
 
     except Exception as e:
         print("palautus virhe", e)
