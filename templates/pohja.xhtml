@@ -53,7 +53,7 @@
                         <input type="hidden" name="piilotetut" value="{{ piilotetut_str }}"/>
                         <input type="hidden" name="palautetut" value="{{ palautetut_str }}"/>
                         <button type="submit">
-                            {% if (rivi, sarake) in palautetut %}
+                            {% if [rivi, sarake] in palautetut %}
                             <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
                             {% else %}
                             <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
@@ -87,7 +87,7 @@
                         <input type="hidden" name="piilotetut" value="{{ piilotetut_str }}"/>
                         <input type="hidden" name="palautetut" value="{{ palautetut_str }}"/>
                         <button type="submit">
-                            {% if (rivi, sarake) in palautetut %}
+                            {% if [rivi, sarake] in palautetut %}
                             <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
                             {% else %}
                             <img src="{{ url_for('static', filename='images/blue.svg') }}" alt="sininen"/>
