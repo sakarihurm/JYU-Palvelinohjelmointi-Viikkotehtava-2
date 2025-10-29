@@ -28,11 +28,19 @@ def lauta():
     koko = request.values.get("koko", data["min"])
     pelaaja1 = request.values.get("p1", "")
     pelaaja2 = request.values.get("p2", "")
-    piilotetut_arvot = request.values.get("piilotetut", "")
-    palautetut_arvot = request.values.get("palautetut", "")
 
-    piilotetut = pura_lista(piilotetut_arvot)
-    palautetut = pura_lista(palautetut_arvot)
+    piilodata = request.values.get("piilodata", "{}")
+    try:
+        piilodata = json.loads(piilodata)
+        piilotetut = piilodata["piilotetut"]
+        palautetut = piilodata["palautetut"]
+        print("/ löytyi piilotettuja ja palautettuja")
+    except Exception as e:
+        piilodata = {}
+        piilotetut = []
+        palautetut = []
+        print("/ exception error")
+    tallenna = json.dumps(piilodata, separators=(',', ':'))
 
     try:
         koko = int(koko)
@@ -49,7 +57,7 @@ def lauta():
         piilotetut.clear()
         palautetut.clear()
     
-    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku="", first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut), content_type="application/xhtml+xml; charset=utf-8")
+    return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku="", first=data["first"], balls=data["balls"], piilotetut=piilotetut, palautetut=palautetut, tallenna=tallenna), content_type="application/xhtml+xml; charset=utf-8")
 
 def tarkistaNimet(pelaaja1, pelaaja2):
     try: 
@@ -65,31 +73,33 @@ def tarkistaNimet(pelaaja1, pelaaja2):
 @app.route('/piilota', methods=['POST'])
 def piilota():
     try:
-        data = {
-            "rivi": int(request.values.get("rivi")),
-            "sarake": int(request.values.get("sarake")),
-            "koko": int(request.form.get("koko")),
-            "p1": request.form.get("p1", ""),
-            "p2": request.form.get("p2", ""),
-            "piilotetut": request.form.get("piilotetut", ""),
-            "palautetut": request.form.get("palautetut", "")
-        }
-        # --- Käsitellään piilotetut ---
-        piilotetut = pura_lista(data["piilotetut"])
-        piilotetut.add((data["rivi"], data["sarake"]))
+        
+        rivi = int(request.form.get("rivi")),
+        sarake = int(request.form.get("sarake")),
+        koko = int(request.form.get("koko")),
+        p1 = request.form.get("p1", ""),
+        p2 = request.form.get("p2", ""),
+        piilodata = request.values.get("piilodata", "{}")
 
-        # --- Käsitellään palautetut ---
-        palautetut = pura_lista(data["palautetut"])
+        try:
+            piilodata = json.loads("piilodata")
+            
+        except Exception as e:
+            piilodata = {
+                "piilotetut": list(),
+                "palautetut": list(),
+            }
+            print("/piilota alustettu piilodata")
 
-        piilotetut_str = muunna(piilotetut)
-        palautetut_str = muunna(palautetut)
+        piilodata["piilotetut"].append((rivi, sarake))
+        print(rivi, sarake)
+        print("/piilota lisätty piilotettuihin", piilodata["piilotetut"])
+        tallenna = json.dumps(piilodata, separators=(',', ':'))
 
         tiedot = {
-            "koko": data["koko"],
-            "p1": data["p1"],
-            "p2": data["p2"],
-            "piilotetut": piilotetut_str,
-            "palautetut": palautetut_str
+            "koko": koko,
+            "p1": p1,
+            "p2": p2,
         }
 
         haku = request.base_url.replace("/piilota", "/palauta") + "?" + urlencode(tiedot)
@@ -100,9 +110,9 @@ def piilota():
 
     return Response(render_template(
         'pohja.xhtml',
-        koko=data["koko"], virhe=False, pelaaja1=data["p1"], pelaaja2=data["p2"],
+        koko=koko, virhe=False, pelaaja1=p1, pelaaja2=p2,
         haku=haku, first="white", balls="top-to-bottom",
-        piilotetut=piilotetut, palautetut=palautetut
+        piilotetut=piilodata["piilotetut"], palautetut=piilodata["palautetut"], tallenna=tallenna
     ), content_type="application/xhtml+xml; charset=utf-8")
 
 
@@ -114,14 +124,24 @@ def palauta():
         koko = int(request.args.get("koko"))
         p1 = request.args.get("p1", "")
         p2 = request.args.get("p2", "")
-        piilotetut_arvot = request.args.get("piilotetut", "")
-        palautetut_arvot = request.args.get("palautetut", "")
+        piilodata = request.values.get("piilodata", "{}")
 
-        piilotetut = pura_lista(piilotetut_arvot)
-        palautetut = pura_lista(palautetut_arvot)
+        try:
+            piilodata = json.loads(piilodata)
+            piilotetut = piilodata["piilotetut"]
+            palautetut = piilodata["palautetut"]
+            print("/palauta löytyi piilotettuja ja palautettuja")
+        except Exception as e:
+            piilodata = {}
+            piilotetut = []
+            palautetut = []
+            print("/palauta exception error")
 
         piilotetut.remove((rivi, sarake))
-        palautetut.add((rivi, sarake))
+        palautetut.append((rivi, sarake))
+        print("/palauta poistettu piilotetuista")
+
+        tallenna = json.dumps(piilodata, separators=(',', ':'))
 
     except Exception as e:
         print("palautus virhe", e)
@@ -130,41 +150,6 @@ def palauta():
         'pohja.xhtml',
         koko=koko, virhe=False, pelaaja1=p1, pelaaja2=p2,
         haku="", first="white", balls="top-to-bottom",
-        piilotetut=piilotetut, palautetut=palautetut
+        piilotetut=piilotetut, palautetut=palautetut, tallenna=tallenna
     ), content_type="application/xhtml+xml; charset=utf-8")
 
-
-def pura_lista(arvot):
-    if not arvot:
-        return set()
-
-    tulos = set()
-    try:
-        osat = arvot.split(';')
-
-        for item in osat:
-            if not item.strip():
-                continue
-
-            luvut = item.split(',')
-            if len(luvut) != 2:
-                continue
-
-            rivi = int(luvut[0])
-            sarake = int(luvut[1])
-
-            tulos.add((rivi, sarake))
-
-    except Exception as e:
-        print("Virhe listan purussa:", e)
-        return set()
-    return tulos
-
-
-def muunna(joukko):
-    tulos = []
-
-    for (rivi, sarake) in joukko:
-        tulos.append(f"{rivi},{sarake}")
-
-    return ';'.join(tulos)

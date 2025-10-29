@@ -19,7 +19,6 @@
     <label>Pelaaja 2 <input type="text" value="{{pelaaja2}}" name="p2" /></label>
 
     <p id="luoPainike"><input type="submit" name="peli" value="Luo pelilauta" /></p>
-
     </form>
 
     {% if virhe %}
@@ -44,13 +43,15 @@
             {% for sarake in range(0, koko) %}
                 {% if sarake == koko - rivi - 1 %}
                 <td>
-                {% if (rivi, sarake) not in piilotetut %}
+                {% if [rivi, sarake] not in piilotetut %}
                     <form action="{{ url_for('piilota') }}" method="POST">
                         <input type="hidden" name="rivi" value="{{ rivi }}"/>
                         <input type="hidden" name="sarake" value="{{ sarake }}"/>
                         <input type="hidden" name="koko" value="{{ koko }}"/>
-                        <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
-                        <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
+                        <input type="hidden" name="_p1" value="{{ pelaaja1 }}"/>
+                        <input type="hidden" name="_p2" value="{{ pelaaja2 }}"/>
+                        <input type="hidden" name="piilotetut" value="{{ piilotetut_str }}"/>
+                        <input type="hidden" name="palautetut" value="{{ palautetut_str }}"/>
                         <button type="submit">
                             {% if (rivi, sarake) in palautetut %}
                             <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
@@ -76,13 +77,15 @@
             {% for sarake in range(0, koko) %}
                 {% if sarake == rivi %}
                 <td>
-                {% if (rivi, sarake) not in piilotetut %}
+                {% if [rivi, sarake] not in piilotetut %}
                     <form action="{{ url_for('piilota') }}" method="POST">
                         <input type="hidden" name="rivi" value="{{ rivi }}"/>
                         <input type="hidden" name="sarake" value="{{ sarake }}"/>
                         <input type="hidden" name="koko" value="{{ koko }}"/>
-                        <input type="hidden" name="p1" value="{{ pelaaja1 }}"/>
-                        <input type="hidden" name="p2" value="{{ pelaaja2 }}"/>
+                        <input type="hidden" name="_p1" value="{{ pelaaja1 }}"/>
+                        <input type="hidden" name="_p2" value="{{ pelaaja2 }}"/>
+                        <input type="hidden" name="piilotetut" value="{{ piilotetut_str }}"/>
+                        <input type="hidden" name="palautetut" value="{{ palautetut_str }}"/>
                         <button type="submit">
                             {% if (rivi, sarake) in palautetut %}
                             <img src="{{ url_for('static', filename='images/red.svg') }}" alt="punainen"/>
