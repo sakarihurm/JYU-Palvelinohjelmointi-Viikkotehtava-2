@@ -9,6 +9,14 @@ label {
   margin-top: 0.3em;
   font-weight: bold;
 }
+
+input {
+  text-align: right; 
+}
+#koko {
+  width: 10%;
+}
+
 #luoPainike {
   text-align: right
 }
