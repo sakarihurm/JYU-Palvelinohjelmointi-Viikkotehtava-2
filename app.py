@@ -12,10 +12,13 @@ app = Flask(__name__)
 def lauta():
     data = haeData()
     virhe = False
+
+    # Hakee muuttujat lomakkeelta tai URL-parametreista
     koko = request.values.get("lauta", data["min"])
     pelaaja1 = request.values.get("p1", "")
     pelaaja2 = request.values.get("p2", "")
 
+    # Tarkistetaan laudan koko. Jos virhe, asetetaan minimiarvo
     try:
         koko = int(koko)
     except Exception as e:
@@ -26,11 +29,13 @@ def lauta():
         koko = data["min"]
         virhe = True
 
+    # Tarkistetaan pelaajien nimet, jos pyyntö on POST-tyyppi ja virheitä ei vielä ole
     if request.method == "POST" and not virhe:
         virhe = tarkistaNimet(pelaaja1, pelaaja2)
 
     return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku="", first=data["first"], balls=data["balls"], piilotetut=[], palautetut=[]), content_type="application/xhtml+xml; charset=utf-8")
 
+# Tarkistaa, että pelaajien nimet eivät ole tyhjiä
 def tarkistaNimet(pelaaja1, pelaaja2):
     try: 
         if len(pelaaja1.strip()) == 0:
@@ -45,6 +50,8 @@ def tarkistaNimet(pelaaja1, pelaaja2):
 @app.route('/piilota', methods=['POST'])
 def piilota():
     data = haeData()
+
+    # Haetaan muuttujat lomakkeen piilotetuista kentistä
     rivi = int(request.values.get("rivi"))
     sarake = int(request.values.get("sarake"))
     koko = int(request.values.get("koko", data["min"]))
@@ -55,9 +62,11 @@ def piilota():
 
     piilotetut = lataaJSON(piilotetut)
     palautetut = lataaJSON(palautetut)
-        
+    
+    # Lisätään piilotetut listaan uusi solu
     piilotetut.append([rivi, sarake])
 
+    # Muodostetaan päivitetyt JSON-merkkijonot
     piilotetut_str = json.dumps(piilotetut, indent=None, separators=(',',':'))
     palautetut_str = json.dumps(palautetut, indent=None, separators=(',',':'))
 
@@ -71,6 +80,7 @@ def piilota():
         "palautetut": palautetut_str
     }
 
+    # Tallennetaan laudan tila URL-parametreihin
     haku = request.base_url.replace("/piilota", "/palauta") + "?" + urlencode(url_tiedot)
     
     return Response(render_template(
@@ -84,6 +94,8 @@ def piilota():
 @app.route('/palauta', methods=['GET'])
 def palauta():
     data = haeData()
+
+    # Haetaan muuttujat URL-parametreista
     rivi = int(request.args.get("rivi"))
     sarake = int(request.args.get("sarake"))
     koko = int(request.args.get("koko"))
@@ -95,9 +107,11 @@ def palauta():
     piilotetut = lataaJSON(piilotetut)
     palautetut = lataaJSON(palautetut)
 
+    # Poistetaan palautettu solu piilotetuista ja lisätään se palautettuihin
     piilotetut.remove([rivi, sarake])
     palautetut.append([rivi, sarake])
 
+    # Muodostetaan päivitetyt JSON-merkkijonot
     piilotetut_str = json.dumps(piilotetut, indent=None, separators=(',',':'))
     palautetut_str = json.dumps(palautetut, indent=None, separators=(',',':'))
 
@@ -108,7 +122,7 @@ def palauta():
         piilotetut=piilotetut, palautetut=palautetut, piilotetut_str=piilotetut_str, palautetut_str=palautetut_str
     ), content_type="application/xhtml+xml; charset=utf-8")
 
-
+# Hakee dynaamisen datan. Jos haku epäonnistuu, palauttaa kovakoodatut arvot.
 def haeData():
     try:
         with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
@@ -118,6 +132,7 @@ def haeData():
         data = {"min": 8, "max": 16, "first": "white", "balls": "top-to-bottom"}
     return data
 
+# Muuntaa JSON-merkkijonon Python-listaksi. Epäonnistuessa palauttaa tyhjän listan.
 def lataaJSON(joukko):
     try:
         tulos = json.loads(joukko)
