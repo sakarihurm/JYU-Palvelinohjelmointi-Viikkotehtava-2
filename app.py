@@ -7,28 +7,14 @@ from urllib.parse import urlencode
 import os
 app = Flask(__name__)
 
-
-# @app.route('/')
-# def peli():
-#     return Response("Game begins", content_type="text/plain; charset=UTF-8")
-
 @app.route('/vt2.cgi', methods=['GET'])
 @app.route('/', methods=['POST', 'GET'])
 def lauta():
-
+    data = haeData()
     virhe = False
-
-    try:
-        with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
-            data = json.load(response)
-    except Exception as e:
-        print("Virhe haettaessa dataa:", e)
-        data = {"min": 8, "max": 16, "first": "white", "balls": "top-to-bottom"}
-
-    koko = request.values.get("koko", data["min"])
+    koko = request.values.get("lauta", data["min"])
     pelaaja1 = request.values.get("p1", "")
     pelaaja2 = request.values.get("p2", "")
-
 
     try:
         koko = int(koko)
@@ -42,7 +28,6 @@ def lauta():
 
     if request.method == "POST" and not virhe:
         virhe = tarkistaNimet(pelaaja1, pelaaja2)
-
 
     return Response(render_template('pohja.xhtml', koko=koko, virhe=virhe, pelaaja1=pelaaja1, pelaaja2=pelaaja2, haku="", first=data["first"], balls=data["balls"], piilotetut=[], palautetut=[]), content_type="application/xhtml+xml; charset=utf-8")
 
@@ -59,36 +44,24 @@ def tarkistaNimet(pelaaja1, pelaaja2):
 
 @app.route('/piilota', methods=['POST'])
 def piilota():
-    data = {}
-    try:
-        with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
-            data = json.load(response)
-    except Exception as e:
-        print("Virhe haettaessa dataa:", e)
-        data = {"min": 8, "max": 16, "first": "white", "balls": "top-to-bottom"}
-    
+    data = haeData()
     rivi = int(request.values.get("rivi"))
     sarake = int(request.values.get("sarake"))
-    koko = int(request.form.get("koko", data["min"]))
+    koko = int(request.values.get("koko", data["min"]))
     p1 = request.form.get("_p1", "")
     p2 = request.form.get("_p2", "")
     piilotetut = request.form.get("piilotetut", [])
     palautetut = request.form.get("palautetut", [])
 
-    try:
-        piilotetut = json.loads(piilotetut)
-    except Exception as e:
-        piilotetut = []
-    try:
-        palautetut = json.loads(palautetut)
-    except Exception as e:
-        palautetut = []
+    piilotetut = lataaJSON(piilotetut)
+    palautetut = lataaJSON(palautetut)
         
     piilotetut.append([rivi, sarake])
-    piilotetut_str = json.dumps(piilotetut)
-    palautetut_str = json.dumps(palautetut)
 
-    tiedot = {
+    piilotetut_str = json.dumps(piilotetut, indent=None, separators=(',',':'))
+    palautetut_str = json.dumps(palautetut, indent=None, separators=(',',':'))
+
+    url_tiedot = {
         "koko": koko,
         "p1": p1,
         "p2": p2,
@@ -98,11 +71,7 @@ def piilota():
         "palautetut": palautetut_str
     }
 
-    haku = request.base_url.replace("/piilota", "/palauta") + "?" + urlencode(tiedot)
-
-    # except Exception as e:
-    #     print("piilotus virhe:", e)
-    #     haku = ""
+    haku = request.base_url.replace("/piilota", "/palauta") + "?" + urlencode(url_tiedot)
     
     return Response(render_template(
         'pohja.xhtml',
@@ -114,13 +83,7 @@ def piilota():
 
 @app.route('/palauta', methods=['GET'])
 def palauta():
-    try:
-        with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
-            data = json.load(response)
-    except Exception as e:
-        print("Virhe haettaessa dataa:", e)
-        data = {"min": 8, "max": 16, "first": "white", "balls": "top-to-bottom"}
-    
+    data = haeData()
     rivi = int(request.args.get("rivi"))
     sarake = int(request.args.get("sarake"))
     koko = int(request.args.get("koko"))
@@ -129,20 +92,14 @@ def palauta():
     piilotetut = request.args.get("piilotetut", [])
     palautetut = request.args.get("palautetut", [])
 
-    try:
-        piilotetut = json.loads(piilotetut)
-    except Exception as e:
-        piilotetut = []
-    try:
-        palautetut = json.loads(palautetut)
-    except Exception as e:
-        palautetut = []
+    piilotetut = lataaJSON(piilotetut)
+    palautetut = lataaJSON(palautetut)
 
     piilotetut.remove([rivi, sarake])
     palautetut.append([rivi, sarake])
 
-    piilotetut_str = json.dumps(piilotetut)
-    palautetut_str = json.dumps(palautetut)
+    piilotetut_str = json.dumps(piilotetut, indent=None, separators=(',',':'))
+    palautetut_str = json.dumps(palautetut, indent=None, separators=(',',':'))
 
     return Response(render_template(
         'pohja.xhtml',
@@ -150,3 +107,20 @@ def palauta():
         haku="", first=data["first"], balls=data["balls"],
         piilotetut=piilotetut, palautetut=palautetut, piilotetut_str=piilotetut_str, palautetut_str=palautetut_str
     ), content_type="application/xhtml+xml; charset=utf-8")
+
+
+def haeData():
+    try:
+        with urllib.request.urlopen("https://europe-west1-ties4080.cloudfunctions.net/vt2_taso1") as response:
+            data = json.load(response)
+    except Exception as e:
+        print("Virhe haettaessa dataa:", e)
+        data = {"min": 8, "max": 16, "first": "white", "balls": "top-to-bottom"}
+    return data
+
+def lataaJSON(joukko):
+    try:
+        tulos = json.loads(joukko)
+    except Exception as e:
+        tulos = []
+    return tulos
